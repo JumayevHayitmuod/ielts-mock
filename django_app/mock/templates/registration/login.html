@@ -1,0 +1,12 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block content %}
+<main class="auth card"><h1>{% ui "Log in" %}</h1>
+<form method="post">{% csrf_token %}
+{% for error in form.non_field_errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+<label for="id_username">{% ui "Username" %}</label>{{ form.username }}{% for error in form.username.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+<label for="id_password">{% ui "Password" %}</label>{{ form.password }}{% for error in form.password.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+<button class="btn primary" type="submit">{% ui "Log in" %}</button></form>
+<p class="note"><a href="{% url 'password_reset' %}">{% ui "Forgot password?" %}</a></p>
+<p class="note" style="margin-top:16px">{% ui "No account?" %} <a href="{% url 'signup' %}">{% ui "Sign up" %}</a></p></main>
+{% endblock %}

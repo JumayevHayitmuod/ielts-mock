@@ -1,0 +1,12 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Practice" %}{% endblock %}
+{% block content %}
+<main class="grid">
+<section class="card"><p class="eyebrow">{% ui "Practice" %}</p><h1>IELTS Mock</h1><p class="note">{% ui "Choose a practice area and track your progress." %}</p><a class="btn primary" href="{% url 'test_catalog' %}">{% ui "Browse tests" %} ({{ test_count }})</a></section>
+<section class="card"><p class="eyebrow">{% ui "Speaking" %}</p><p class="note">{{ tasks|length }} {% ui "practice prompts" %}</p><a class="btn" href="{% url 'speaking' %}">{% ui "Open speaking" %}</a></section>
+<section class="card"><p class="eyebrow">{% ui "Writing" %}</p><p class="note">{{ writing_task_count }} {% ui "practice tasks" %}</p><a class="btn" href="{% url 'writing' %}">{% ui "Open Writing" %}</a></section>
+<section class="card"><p class="eyebrow">{% ui "Vocabulary" %}</p><p class="note">{{ word_count }} {% ui "vocabulary words" %}</p><a class="btn" href="{% url 'vocabulary' %}">{% ui "Word list" %}</a> <a class="btn primary" href="{% url 'vocabulary_test' %}">{% ui "Start quiz" %}</a></section>
+<section class="card"><p class="eyebrow">{% ui "Results" %}</p><p class="note">{% ui "Review your scores and recent attempts." %}</p><a class="btn" href="{% url 'results' %}">{% ui "View results" %}</a></section>
+</main>
+{% endblock %}

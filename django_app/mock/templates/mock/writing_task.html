@@ -1,0 +1,37 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Writing" %} · {% ui "Task " %}{{ task.part }}{% endblock %}
+{% block content %}
+<main class="grid writing-grid">
+<section class="card writing-prompt">
+<p class="eyebrow">{% ui "Task " %}{{ task.part }} · {{ task.duration_minutes }} {% ui "minutes" %}</p>
+<h1>{{ task.title }}</h1>
+<p>{{ task.prompt }}</p>
+{% if task.data_table.headers %}
+<div class="writing-table"><table>
+<tr>{% for header in task.data_table.headers %}<th>{{ header }}</th>{% endfor %}</tr>
+{% for row in task.data_table.rows %}<tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% endfor %}
+</table></div>
+{% endif %}
+<p class="note">{% ui "Write at least " %}{{ task.minimum_words }} {% ui "words. Your response is saved to your account." %}</p>
+</section>
+<section class="card">
+<form method="post">{% csrf_token %}
+<label for="writing-response">{% ui "Your response" %}</label>
+<textarea class="writing-response" id="writing-response" name="response" rows="16" maxlength="20000" required></textarea>
+<div class="writing-meta"><span id="word-count">0 {% ui "words" %}</span><span>{% ui "Recommended time: " %}{{ task.duration_minutes }} {% ui "minutes" %}</span></div>
+<button class="btn primary" type="submit">{% ui "Save response" %}</button>
+</form>
+</section>
+</main>
+<script>
+(function(){
+  var input=document.getElementById('writing-response');
+  var output=document.getElementById('word-count');
+  input.addEventListener('input',function(){
+    var words=input.value.trim().split(/\s+/).filter(Boolean).length;
+    output.textContent=words+' {% ui "words" %}';
+  });
+})();
+</script>
+{% endblock %}

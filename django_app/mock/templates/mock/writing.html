@@ -1,0 +1,19 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Writing" %}{% endblock %}
+{% block content %}
+<main class="grid">
+<section class="card">
+<p class="eyebrow">IELTS {% ui "Writing" %}</p>
+<h1>{% ui "Choose a task" %}</h1>
+{% for task in tasks %}
+<article class="test-card">
+<p class="eyebrow">{% ui "Task " %}{{ task.part }} · {{ task.duration_minutes }} {% ui "min" %}</p>
+<h2>{{ task.title }}</h2>
+<p class="note">{% ui "At least " %}{{ task.minimum_words }} {% ui " words" %}</p>
+<a class="btn primary" href="{% url 'writing_task' task.pk %}">{% ui "Start task" %}</a>
+</article>
+{% empty %}<p class="note">{% ui "Writing tasks have not been added yet." %}</p>{% endfor %}
+</section>
+</main>
+{% endblock %}

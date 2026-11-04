@@ -1,0 +1,15 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Writing response saved" %}{% endblock %}
+{% block content %}
+<main class="grid result-grid">
+<section class="card result-card">
+<p class="eyebrow">{% ui "Writing" %} {% ui "Task " %}{{ attempt.task.part }}</p>
+<h1>{{ attempt.task.title }}</h1>
+<div class="result-score">{{ attempt.word_count }}</div>
+<p class="note">{% ui "words saved to your account" %}</p>
+{% if attempt.word_count < attempt.task.minimum_words %}<p class="note">{% ui "The response is below the recommended minimum of " %}{{ attempt.task.minimum_words }} {% ui "words." %}</p>{% endif %}
+<a class="btn primary" href="{% url 'writing' %}">{% ui "Back to Writing" %}</a>
+</section>
+</main>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Test results" %}{% endblock %}
+{% block content %}
+<main class="grid result-grid">
+<section class="card center result-card">
+{% if latest_attempt %}
+<p class="eyebrow">{% ui "Test result" %}</p>
+<h1>{{ result_title }}</h1>
+<div class="result-score">{{ result_correct }}/{{ result_total }}</div>
+<p class="note">{% ui "Correct answers" %}</p>
+{% if section_results|length > 1 %}<p class="note">{% for result in section_results %}{% if not forloop.first %} · {% endif %}{{ result.name }}: {{ result.correct }}/{{ result.total }}{% endfor %}</p>{% endif %}
+<p class="eyebrow">{% ui "Estimated CEFR level" %}</p>
+<div class="result-level">{{ latest_level }}{% if latest_level_name %}<span>{{ latest_level_name|translate_ui }}</span>{% endif %}</div>
+{% if latest_attempt.band %}<p class="note">Estimated IELTS band: {{ latest_attempt.band }}</p>{% endif %}
+<p class="note">{% ui "Practice estimate based on your score, not an official certificate." %}</p>
+<a class="btn primary" href="{% url 'review' latest_attempt.pk %}">{% ui "Review latest section" %}</a>
+{% else %}
+<p class="eyebrow">{% ui "No test results yet" %}</p>
+<p class="note">{% ui "Complete a test to see your correct answers and estimated level." %}</p>
+{% endif %}
+<a class="btn primary" href="{% url 'home' %}">{% ui "Take another test" %}</a>
+</section>
+</main>
+{% endblock %}

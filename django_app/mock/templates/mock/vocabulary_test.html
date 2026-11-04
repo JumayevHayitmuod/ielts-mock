@@ -1,0 +1,31 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Vocabulary Test" %}{% endblock %}
+{% block content %}
+<main class="grid">
+<section class="card">
+<p class="eyebrow">{% ui "Band " %}{{ word.band_level }}</p>
+<div class="word">{{ word.word }}</div>
+<p class="note">{{ word.phonetic }}{% if word.part_of_speech %} · {{ word.part_of_speech }}{% endif %}</p>
+{% if feedback %}
+<p style="font:400 18px/1.7 'Source Serif 4',serif">{{ word.definition }}</p>
+{% if word.example %}<p class="note"><i>{{ word.example }}</i></p>{% endif %}
+{% endif %}
+</section>
+<section class="card">
+{% if feedback %}
+<h2>{% if feedback.correct %}<span class="ok">{% ui "Correct" %}</span>{% else %}<span class="no">{% ui "Not quite" %}</span>{% endif %}</h2>
+<p class="note">{% ui "Meaning: " %}{{ word.definition }}</p>
+<a class="btn primary" href="{% url 'vocabulary_test' %}?after={{ word.pk }}">{% ui "Next question" %}</a>
+{% else %}
+<h2>{% ui "Vocabulary Test" %}</h2>
+<p class="note">{% ui "Choose the best meaning of “" %}{{ word.word }}”.</p>
+<form method="post">{% csrf_token %}
+<input type="hidden" name="word_id" value="{{ word.pk }}">
+<div class="opts col" style="margin-bottom:24px">{% for o in options %}<label class="opt"><input type="radio" name="choice" value="{{ o }}" required> {{ o }}</label>{% endfor %}</div>
+<button class="btn dark" type="submit">{% ui "Check answer" %}</button>
+</form>
+{% endif %}
+</section>
+</main>
+{% endblock %}

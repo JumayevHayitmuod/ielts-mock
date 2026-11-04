@@ -1,0 +1,90 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block site_header %}
+<header class="exam-topbar">
+<a class="exam-label" href="{% url 'test_catalog' %}">{% if full_exam %}{% ui "Full test" %} · {% endif %}{% ui test.get_section_display %}</a>
+<div class="exam-progress"{% if test.section != "quiz" %} role="progressbar" aria-label="Test progress" aria-valuemin="0" aria-valuemax="{{ questions|length }}" aria-valuenow="1"{% endif %}><span id="progress-fill"></span></div>
+<div class="exam-timer" id="timer" data-seconds="{{ seconds }}" role="timer">{{ test.duration_minutes }}:00</div>
+<details class="language-menu">
+<summary aria-label="Change language">{% if request.LANGUAGE_CODE == 'en' %}<span>🇬🇧</span><b>EN</b>{% else %}<span>🇺🇿</span><b>UZ</b>{% endif %}<span class="language-chevron" aria-hidden="true">⌄</span></summary>
+<div class="language-options">
+<form action="{% url 'set_language' %}" method="post">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="language-button{% if request.LANGUAGE_CODE == 'uz' %} active{% endif %}" type="submit" name="language" value="uz"><span>🇺🇿</span><b>O‘zbekcha</b></button></form>
+<form action="{% url 'set_language' %}" method="post">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="language-button{% if request.LANGUAGE_CODE == 'en' %} active{% endif %}" type="submit" name="language" value="en"><span>🇬🇧</span><b>English</b></button></form>
+</div>
+</details>
+</header>
+{% endblock %}
+{% block content %}
+<main class="exam-screen">
+{% if test.section == "listening" and test.audio %}
+<details class="exam-passage">
+<summary>{% ui "Listening audio" %}</summary>
+<audio controls controlsList="nodownload" src="{{ test.audio.url }}"></audio>
+<p class="note">{% ui "You will hear the recording once only. Answer the questions while you listen." %}</p>
+</details>
+{% endif %}
+<form class="exam-form" id="test-form" method="post">{% csrf_token %}
+<section class="exam-question-card">
+{% if test.section == "quiz" %}<p class="exam-test-title">{{ test.title }}</p>{% endif %}
+{% for q in questions %}
+<fieldset class="exam-question" id="q{{ q.number }}"{% if not forloop.first %} hidden{% endif %}>
+<legend>{% if test.section != "quiz" %}{{ q.number }}. {% endif %}{{ q.text }}</legend>
+{% if q.instruction %}<p class="exam-instruction">{{ q.instruction }}</p>{% endif %}
+{% if q.kind == "tfng" %}
+<div class="exam-options">
+<label class="exam-option"><input type="radio" name="q{{ q.number }}" value="TRUE"><span>TRUE</span></label>
+<label class="exam-option"><input type="radio" name="q{{ q.number }}" value="FALSE"><span>FALSE</span></label>
+<label class="exam-option"><input type="radio" name="q{{ q.number }}" value="NOT GIVEN"><span>NOT GIVEN</span></label>
+</div>
+{% elif q.kind == "mcq" %}
+<div class="exam-options">{% for o in q.options %}<label class="exam-option"><input type="radio" name="q{{ q.number }}" value="{{ o }}"><span>{{ o }}</span></label>{% endfor %}</div>
+{% else %}
+<input class="exam-answer" type="text" name="q{{ q.number }}" autocomplete="off" aria-label="Answer to question {{ q.number }}">
+{% endif %}
+</fieldset>
+{% empty %}<p class="note">{% ui "This test has no questions yet." %}</p>{% endfor %}
+</section>
+{% if questions %}
+<div class="exam-controls">
+{% if test.section != "quiz" %}<span id="question-count">{% ui "Question " %}1{% ui " of " %}{{ questions|length }}</span>{% endif %}
+<div class="exam-buttons"><button class="exam-button secondary" id="previous-question" type="button" disabled>{% ui "Previous" %}</button><button class="exam-button primary" id="next-question" type="button">{% ui "Next" %}</button><button class="exam-button primary" id="submit-test" type="submit" hidden>{% ui "Finish test" %}</button></div>
+</div>
+{% endif %}
+</form>
+</main>
+<script>
+(function(){
+  var form=document.getElementById('test-form');
+  var questions=Array.from(form.querySelectorAll('.exam-question'));
+  var current=0;
+  var previous=document.getElementById('previous-question');
+  var next=document.getElementById('next-question');
+  var submit=document.getElementById('submit-test');
+  var count=document.getElementById('question-count');
+  var fill=document.getElementById('progress-fill');
+  var progress=document.querySelector('.exam-progress');
+  function showQuestion(index){
+    current=index;
+    questions.forEach(function(question,i){question.hidden=i!==current;});
+    if(count) count.textContent='{% ui "Question " %}'+(current+1)+'{% ui " of " %}'+questions.length;
+    if(fill) fill.style.width=((current+1)/questions.length*100)+'%';
+    if(progress) progress.setAttribute('aria-valuenow',current+1);
+    if(previous) previous.disabled=current===0;
+    if(next) next.hidden=current===questions.length-1;
+    if(submit) submit.hidden=current!==questions.length-1;
+  }
+  if(questions.length){
+    showQuestion(0);
+    previous.addEventListener('click',function(){if(current>0) showQuestion(current-1);});
+    next.addEventListener('click',function(){if(current<questions.length-1) showQuestion(current+1);});
+  }
+  var timer=document.getElementById('timer'),left=parseInt(timer.dataset.seconds,10);
+  var interval=setInterval(function(){
+    left--;
+    var minutes=Math.floor(left/60),seconds=left%60;
+    timer.textContent=(minutes<10?'0':'')+minutes+':'+(seconds<10?'0':'')+seconds;
+    if(left<=0){clearInterval(interval);form.requestSubmit();}
+  },1000);
+})();
+</script>
+{% endblock %}

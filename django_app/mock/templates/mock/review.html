@@ -1,0 +1,16 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Review" %} · {{ attempt.test.title }}{% endblock %}
+{% block content %}
+<main class="grid"><section class="card" style="grid-column:1/-1">
+<h1>{{ attempt.correct }} / {{ attempt.total }} {% ui "correct" %}</h1>
+<div style="overflow-x:auto"><table>
+<tr><th>#</th><th>{% ui "Question" %}</th><th>{% ui "Your answer" %}</th><th>{% ui "Correct answer" %}</th><th></th></tr>
+{% for a in answers %}
+<tr id="q{{ a.question.number }}"><td>{{ a.question.number }}</td><td>{{ a.question.text }}</td><td>{{ a.value|default:"—" }}</td><td>{{ a.question.answer }}</td>
+<td>{% if a.is_correct %}<span class="ok">{% ui "Correct" %}</span>{% else %}<span class="no">{% ui "Wrong" %}</span>{% endif %}</td></tr>
+{% endfor %}
+</table></div>
+<p style="margin-top:24px"><a class="btn" href="{% url 'results' %}">{% ui "Back to results" %}</a></p>
+</section></main>
+{% endblock %}

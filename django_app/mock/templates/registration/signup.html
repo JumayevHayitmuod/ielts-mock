@@ -1,0 +1,21 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block content %}
+<main class="auth card"><h1>{% ui "Sign up" %}</h1>
+<p class="note">{% ui "Create an account to save your test results." %}</p>
+<form method="post">{% csrf_token %}
+{% for field in form %}
+<div class="signup-field{% if field.name == 'results_consent' %} consent-field{% endif %}">
+{% if field.name == 'results_consent' %}
+<label class="consent-label">{{ field }}<span>{{ field.label|translate_ui }}</span></label>
+{% else %}
+<label for="{{ field.id_for_label }}">{{ field.label|translate_ui }}</label>{{ field }}
+{% endif %}
+{% for error in field.errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+{% if field.help_text %}<p class="field-help">{{ field.help_text }}</p>{% endif %}
+</div>
+{% endfor %}
+{% for error in form.non_field_errors %}<p class="field-error">{{ error }}</p>{% endfor %}
+<button class="btn primary" type="submit">{% ui "Proceed" %}</button></form>
+<p class="note" style="margin-top:16px">{% ui "Already registered?" %} <a href="{% url 'login' %}">{% ui "Log in" %}</a></p></main>
+{% endblock %}

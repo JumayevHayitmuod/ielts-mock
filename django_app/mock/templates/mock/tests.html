@@ -1,0 +1,32 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Practice tests" %}{% endblock %}
+{% block content %}
+<main class="grid">
+<section class="card full-exam-card">
+<p class="eyebrow">{% ui "Full test" %}</p>
+<div class="test-time"><strong>50</strong><span>{% ui "MIN" %}</span></div>
+<h2>{% ui "Reading + Listening" %}</h2>
+<p class="note">{% ui "25 minutes per section · Combined result saved to your account" %}</p>
+{% if full_exam_ready %}<a class="btn primary" href="{% url 'full_exam' %}">{% ui "Start full test" %}</a>{% else %}<p class="note">{% ui "Listening audio and questions must be added by the administrator before this test can start." %}</p>{% endif %}
+</section>
+<section class="card">
+<p class="eyebrow">{% ui "Reading" %}</p>
+{% for test in reading %}
+<article class="test-card"><div class="test-time"><strong>{{ test.duration_minutes }}</strong><span>{% ui "MIN" %}</span></div><h2>{{ test.title }}</h2><p class="note">{{ test.questions.count }} {% ui "questions" %} · {% ui "Results saved to your account" %}</p><div class="test-actions"><a class="btn primary" href="{% url 'test' test.pk %}">{% ui "Take the test" %}</a><a href="{% url 'test_details' test.pk %}">{% ui "Test details →" %}</a></div></article>
+{% empty %}<p class="note">{% ui "No Reading tests yet." %}</p>{% endfor %}
+</section>
+<section class="card">
+<p class="eyebrow">{% ui "Listening" %}</p>
+{% for test in listening %}
+<article class="test-card"><div class="test-time"><strong>{{ test.duration_minutes }}</strong><span>{% ui "MIN" %}</span></div><h2>{{ test.title }}</h2><p class="note">{{ test.questions.count }} {% ui "questions" %} · {% ui "Results saved to your account" %}</p><div class="test-actions"><a class="btn primary" href="{% url 'test' test.pk %}">{% ui "Take the test" %}</a><a href="{% url 'test_details' test.pk %}">{% ui "Test details →" %}</a></div></article>
+{% empty %}<p class="note">{% ui "No Listening tests yet." %}</p>{% endfor %}
+</section>
+<section class="card">
+<p class="eyebrow">{% ui "Quiz" %}</p>
+{% for test in quizzes %}
+<article class="test-card"><div class="test-time"><strong>{{ test.duration_minutes }}</strong><span>{% ui "MIN" %}</span></div><h2>{{ test.title }}</h2><p class="note">{% if test.section != "quiz" %}{{ test.questions.count }} {% ui "questions · " %}{% endif %}{% ui "Results saved to your account" %}</p><div class="test-actions"><a class="btn primary" href="{% url 'test' test.pk %}">{% ui "Take the test" %}</a><a href="{% url 'test_details' test.pk %}">{% ui "Test details →" %}</a></div></article>
+{% empty %}<p class="note">{% ui "No tests yet." %}</p>{% endfor %}
+</section>
+</main>
+{% endblock %}

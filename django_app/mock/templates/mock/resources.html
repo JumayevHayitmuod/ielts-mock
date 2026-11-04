@@ -1,0 +1,16 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Resources" %}{% endblock %}
+{% block content %}
+<main class="grid">
+<section class="card resources-list">
+<p class="eyebrow">{% ui "Official preparation" %}</p>
+<h1>{% ui "IELTS preparation resources" %}</h1>
+<p class="note">{% ui "Official sites provide free sample tests and preparation materials. These links open external websites." %}</p>
+<a href="https://ielts.org/take-a-test/preparation-resources/sample-test-questions/academic-test" target="_blank" rel="noreferrer"><strong>IELTS.org</strong><span>{% ui "Official Academic sample questions and answers" %}</span></a>
+<a href="https://takeielts.britishcouncil.org/prepare/ielts-free-practice-mock-tests/academic" target="_blank" rel="noreferrer"><strong>British Council</strong><span>{% ui "Free Academic IELTS practice for all four skills" %}</span></a>
+<a href="https://ielts.idp.com/prepare/ielts-practice-tests" target="_blank" rel="noreferrer"><strong>IDP IELTS</strong><span>{% ui "Official IELTS preparation and practice tests" %}</span></a>
+<p class="note resources-note">{% ui "Check usage permissions before uploading external tests or audio. This site includes original sample tasks." %}</p>
+</section>
+</main>
+{% endblock %}

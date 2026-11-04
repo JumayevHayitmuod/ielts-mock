@@ -1,0 +1,19 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Test details" %}{% endblock %}
+{% block content %}
+<main class="grid">
+<section class="card">
+<div class="test-time"><strong>{{ test.duration_minutes }}</strong><span>{% ui "MIN" %}</span></div>
+<p class="eyebrow">{% ui test.get_section_display %}</p>
+<h1>{{ test.title }}</h1>
+<p class="note">{% if test.section != "quiz" %}{{ question_count }} {% ui "questions · " %}{% endif %}{% ui "Your result will be saved to your account." %}</p>
+<ul class="test-facts">
+<li>{% ui "Timed practice" %}</li>
+<li>{% ui "Review your answers after submitting" %}</li>
+{% if test.section == "quiz" %}<li>{% ui "Questions and answer choices only" %}</li>{% endif %}
+</ul>
+<div class="test-actions"><a class="btn primary" href="{% url 'test' test.pk %}">{% ui "Take the test" %}</a><a href="{% url 'test_catalog' %}">{% ui "Back to tests" %}</a></div>
+</section>
+</main>
+{% endblock %}

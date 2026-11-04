@@ -1,0 +1,68 @@
+{% extends "mock/base.html" %}
+{% load static ui_language %}
+{% get_media_prefix as media_prefix %}
+{% block sub %}{% ui "Vocabulary" %}{% endblock %}
+{% block content %}
+<main class="grid">
+<section class="card">
+<p class="eyebrow">{% ui "Dictionary" %}</p>
+<h1>{% ui "Vocabulary" %}</h1>
+<p class="note">{{ words|length }} words</p>
+<div class="vocab-list">
+{% for word in words %}
+<article class="vocab-entry">
+<div class="vocab-heading"><strong>{{ word.word }}</strong><div><span>{% ui "Band " %}{{ word.band_level }}</span> <button class="listen-word" type="button" data-pronounce="{{ word.word }}" data-audio-target="pronunciation-{{ word.pk }}" aria-label="{% ui 'Hear word pronounced' %}">🎧 {% ui "Listen" %}</button></div></div>
+<audio class="vocab-audio" id="pronunciation-{{ word.pk }}" preload="none" src="{{ media_prefix }}pronunciation/{{ word.word|slugify }}.mp3"></audio>
+{% if word.phonetic or word.part_of_speech %}<p class="note">{{ word.phonetic }}{% if word.phonetic and word.part_of_speech %} · {% endif %}{{ word.part_of_speech }}</p>{% endif %}
+<p>{{ word.definition }}</p>
+{% if word.translation_uz %}<p class="vocab-translation"><strong>{% ui "Uzbek translation:" %}</strong> {{ word.translation_uz }}</p>{% endif %}
+{% if word.example %}<p class="note"><i>{{ word.example }}</i></p>{% endif %}
+</article>
+{% empty %}<p class="note">{% ui "No words yet. Add some in the admin." %}</p>
+{% endfor %}
+</div>
+<a class="btn primary" href="{% url 'vocabulary_test' %}">{% ui "Start vocabulary test" %}</a>
+</section>
+</main>
+<script>
+(function(){
+	var buttons=document.querySelectorAll('[data-pronounce]');
+	var hasSpeech='speechSynthesis' in window;
+	var voices=hasSpeech?window.speechSynthesis.getVoices():[];
+	if(hasSpeech) window.speechSynthesis.addEventListener('voiceschanged',function(){voices=window.speechSynthesis.getVoices();});
+	function selectEnglishVoice(){
+		var english=voices.filter(function(voice){return voice.lang.toLowerCase().indexOf('en')===0;});
+		return english.find(function(voice){return /natural|online/i.test(voice.name);})
+			|| english.find(function(voice){return voice.lang.toLowerCase()==='en-gb';})
+			|| english[0]
+			|| null;
+	}
+	function speakFallback(button){
+		if(!hasSpeech) return;
+		window.speechSynthesis.cancel();
+		var utterance=new SpeechSynthesisUtterance(button.dataset.pronounce);
+		var englishVoice=selectEnglishVoice();
+		utterance.lang=englishVoice?englishVoice.lang:'en-GB';
+		utterance.rate=1.05;
+		utterance.pitch=0.98;
+		utterance.volume=0.9;
+		if(englishVoice) utterance.voice=englishVoice;
+		window.speechSynthesis.speak(utterance);
+	}
+	buttons.forEach(function(button){
+		button.addEventListener('click',function(){
+			var audio=document.getElementById(button.dataset.audioTarget);
+			if(audio&&!button.dataset.audioMissing){
+				audio.volume=0.9;
+				audio.playbackRate=1;
+				audio.currentTime=0;
+				var playback=audio.play();
+				if(playback) playback.catch(function(){button.dataset.audioMissing='true';speakFallback(button);});
+				return;
+			}
+			speakFallback(button);
+		});
+	});
+})();
+</script>
+{% endblock %}

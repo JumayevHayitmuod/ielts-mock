@@ -1,0 +1,57 @@
+{% extends "mock/base.html" %}
+{% load ui_language %}
+{% block sub %}{% ui "Speaking" %} · {% ui "Part" %} {{ task.part }}{% endblock %}
+{% block content %}
+<main class="grid">
+<section class="card">
+<p class="eyebrow">{% if task.part == 2 %}{% ui "Cue card" %}{% else %}{% ui "Question" %}{% endif %}</p>
+<h1>{{ task.prompt }}</h1>
+{% if task.bullet_list %}<p><b>{% ui "You should say:" %}</b></p><ul class="cue">{% for b in task.bullet_list %}<li>{{ b }}</li>{% endfor %}</ul>{% endif %}
+{% if task.closing %}<p style="font:400 17px/1.7 'Source Serif 4',serif">{{ task.closing }}</p>{% endif %}
+</section>
+<section class="card center">
+<form method="post" enctype="multipart/form-data" id="sp-form">{% csrf_token %}
+<p class="note" id="status">{% ui "Press the button and start speaking. Up to " %}<span id="limit">{{ task.speak_seconds }}</span>{% ui " seconds." %}</p>
+<button type="button" class="mic" id="mic">{% ui "Record" %}</button>
+<input type="file" name="audio" id="audio" hidden>
+<p class="note" style="margin-top:24px;text-align:left">{% ui "Transcript (filled automatically where your browser supports speech recognition. You can edit or type it.)" %}</p>
+<textarea name="transcript" id="transcript" rows="6" aria-label="Transcript"></textarea>
+<p style="margin-top:16px"><button class="btn dark" type="submit">{% ui "Finish and get score" %}</button></p>
+</form>
+</section>
+</main>
+<script>
+(function(){
+  var mic=document.getElementById('mic'),status=document.getElementById('status'),tr=document.getElementById('transcript'),fi=document.getElementById('audio');
+  var limit={{ task.speak_seconds }},rec,chunks=[],recog,iv,secs=0,on=false,stream;
+  function fmt(s){return (s<10?'0':'')+Math.floor(s/60)+':'+(s%60<10?'0':'')+(s%60);}
+  function stop(){
+    on=false;clearInterval(iv);mic.classList.remove('rec');mic.textContent='{% ui "Record" %}';
+    if(rec&&rec.state!=='inactive')rec.stop();
+    if(recog)try{recog.stop();}catch(e){}
+    status.textContent='{% ui "Recording finished." %}';
+  }
+  async function start(){
+    try{stream=await navigator.mediaDevices.getUserMedia({audio:true});}
+    catch(e){status.textContent='{% ui "Microphone not available. Type your answer below." %}';return;}
+    chunks=[];rec=new MediaRecorder(stream);
+    rec.ondataavailable=function(e){chunks.push(e.data);};
+    rec.onstop=function(){
+      var blob=new Blob(chunks,{type:rec.mimeType});
+      var dt=new DataTransfer();dt.items.add(new File([blob],'answer.webm',{type:blob.type}));
+      fi.files=dt.files;stream.getTracks().forEach(function(t){t.stop();});
+    };
+    rec.start();
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(SR){
+      recog=new SR();recog.lang='en-US';recog.continuous=true;
+      recog.onresult=function(e){for(var i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)tr.value+=e.results[i][0].transcript+' ';}};
+      try{recog.start();}catch(e){}
+    }
+    on=true;secs=0;mic.classList.add('rec');mic.textContent='{% ui "Stop" %}';
+    iv=setInterval(function(){secs++;status.textContent='{% ui "Recording" %} '+fmt(secs)+' / '+fmt(limit);if(secs>=limit)stop();},1000);
+  }
+  mic.addEventListener('click',function(){on?stop():start();});
+})();
+</script>
+{% endblock %}

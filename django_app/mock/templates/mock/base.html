@@ -1,0 +1,34 @@
+{% load static ui_language %}<!doctype html>
+<html lang="{{ request.LANGUAGE_CODE|default:'uz' }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}IELTS Mock{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Source+Serif+4:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'mock/style.css' %}">
+</head>
+<body>
+{% block site_header %}
+<header class="topbar">
+<div class="brand"><a href="{% url 'home' %}">IELTS Mock</a><span class="sub">{% block sub %}{% endblock %}</span></div>
+<div class="topright">
+<details class="language-menu">
+<summary aria-label="Change language">{% if request.LANGUAGE_CODE == 'en' %}<span>🇬🇧</span><b>EN</b>{% else %}<span>🇺🇿</span><b>UZ</b>{% endif %}<span class="language-chevron" aria-hidden="true">⌄</span></summary>
+<div class="language-options">
+<form action="{% url 'set_language' %}" method="post">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="language-button{% if request.LANGUAGE_CODE == 'uz' %} active{% endif %}" type="submit" name="language" value="uz"><span>🇺🇿</span><b>O‘zbekcha</b></button></form>
+<form action="{% url 'set_language' %}" method="post">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="language-button{% if request.LANGUAGE_CODE == 'en' %} active{% endif %}" type="submit" name="language" value="en"><span>🇬🇧</span><b>English</b></button></form>
+</div>
+</details>
+{% if user.is_authenticated %}
+<nav><a href="{% url 'test_catalog' %}">{% ui "Practice tests" %}</a><a href="{% url 'speaking' %}">{% ui "Speaking" %}</a><a href="{% url 'writing' %}">{% ui "Writing" %}</a><a href="{% url 'vocabulary' %}">{% ui "Vocabulary" %}</a><a href="{% url 'resources' %}">{% ui "Resources" %}</a><a href="{% url 'results' %}">{% ui "Results" %}</a></nav>
+<form method="post" action="{% url 'logout' %}">{% csrf_token %}<button class="btn ghost" type="submit">{% ui "Log out" %}</button></form>
+{% endif %}
+</div>
+</header>
+{% endblock %}
+{% for m in messages %}<div class="msg" role="status">{{ m|translate_ui }}</div>{% endfor %}
+{% block content %}{% endblock %}
+{% block footer %}{% endblock %}
+</body>
+</html>
